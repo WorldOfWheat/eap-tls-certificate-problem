@@ -1,0 +1,36 @@
+services:
+  strongswan:
+    container_name: strongswan
+    build: ./strongswan
+    ports:
+      - "500:500/udp"
+      - "4500:4500/udp"
+    privileged: true
+    networks:
+      internal_work:
+        ipv4_address: 10.5.0.4
+      
+  freeradius:
+    container_name: freeradius
+    build: ./freeradius
+    networks:
+      internal_work:
+        ipv4_address: 10.5.0.3
+
+  ncserver:
+    container_name: flagserver
+    image: busybox:1.37.0-glibc
+    command: sh -c "while true; do nc -lp 80 < flag.html; done"
+    volumes:
+      - "./flag.html:/flag.html"
+    networks:
+      internal_work:
+        ipv4_address: 10.5.0.2
+
+networks:
+  internal_work:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
